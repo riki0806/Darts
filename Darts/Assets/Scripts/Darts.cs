@@ -5,96 +5,93 @@ using UnityEngine.SceneManagement;
 
 public class Darts : MonoBehaviour
 {
-    private float maxScreenSizeX;
-    private float maxScreenSizeY;
+    //public GameObject Score, Board;
+    public float DragSpeed, ThrowSpeed, RotationSpeed;
+    int[] scores = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 };
+    //int points = 0;
 
-    private Vector3 oldPosition;
-    private Vector3 nowPower;
 
-    private Vector3 maxScreenSize;
-    private Vector2 startPos;
-
-    public float speedY = 3.0f;
-    public float speedZ = 100.0f;
-
-    AudioSource audioSource;
-    public GameObject congrats;
-
-    private float timeElapsed;
-    private bool frite;
-
-    //float angle = 10;
-    //float rad = angle * Mathf.Deg2Rad;
-
-    // Start is called before the first frame update
     void Start()
     {
-        maxScreenSizeX= Screen.width;
-        maxScreenSizeY = Screen.height;
-        maxScreenSize = new Vector3(Screen.width/2, Screen.height/2, 0.0f);
-        frite = false;
-        audioSource = GetComponent<AudioSource>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Vector3 nowPosition = Input.mousePosition;
+        if ((Input.GetMouseButton(0)) & !CompareTag("Finish"))
+            if (Input.GetMouseButton(1))
+            {
+                Vector3 angles = new Vector3(-Input.GetAxisRaw("Mouse Y"), Input.GetAxisRaw("Mouse X"), 0);
+                transform.Rotate(angles * RotationSpeed * Time.deltaTime);
+            }
+            else
+            {
+                Vector3 direction = new Vector3(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"), 0);
+                transform.Translate(direction * DragSpeed * Time.deltaTime);
+            }
 
-        //Debug.Log(nowPosition);
-        Vector3 screenToWorldPointPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition+new Vector3(0,0,3.0f));
-
-        //Debug.Log(screenToWorldPointPosition);
-        if (!frite)
-        {
-            gameObject.transform.position = screenToWorldPointPosition;
-        }
-
-
-
-        //速度を取る
-        /*if (oldPosition.y<nowPosition.y)
-        {
-            nowPower += nowPosition - oldPosition;
-        }
-        if (oldPosition.y>=nowPosition.y)
-        {
-            nowPower = Vector3.zero;
-        }*/
-
-        if (Input.GetMouseButton(0)&&timeElapsed < 10)
-        {
-            timeElapsed += Time.deltaTime;
-        }
-        else if (Input.GetMouseButtonUp(0)&& !frite)
-        {
-            float y = speedY * timeElapsed;
-            float z = speedZ * timeElapsed;
-            //var Force = new Vector3(0.0f, 1.0f, 1000.0f);
-            GetComponent<Rigidbody>().AddForce(0f, y, z);
-            frite = true;
-            timeElapsed = 0.0f;
-        }
-
-        //oldPosition = Input.mousePosition;
-
-        if (Input.GetMouseButtonDown(1))
+        if(Input.GetKeyDown("r"))
         {
             SceneManager.LoadScene(0);
         }
     }
 
-    private void OnCollisionEnter(Collision other)
+    void FixedUpdate()
     {
-        GetComponent<Rigidbody>().isKinematic = true;
+        if (Input.GetMouseButtonUp(0))
+            GetComponent<Rigidbody>().AddForce(Vector3.forward * ThrowSpeed, ForceMode.Impulse);
     }
 
-    private void OnTriggerEnter(Collider col)
+    void OnCollisionEnter()
     {
-        if(col.gameObject.tag == "target")
-        {
-            congrats.SetActive(true);
-            audioSource.Play();
-        }
+        GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        //AddPoints();
+        tag = "Finish";
     }
+
+    /*private void AddPoints()
+    {
+        points += CountPoints();
+        //Score.guiText.text = points.ToString();
+    }*/
+
+    /*int CountPoints()
+    {
+        Vector2 v = new Vector2(transform.position.x, transform.position.y);
+
+        //sector
+        float a = Vector2.Angle(Vector2.up, v);
+        if ((v.x < 0) && (a > 9))
+            a = 360 - a;
+        float b = (a + 9) / 18;
+        int i = Mathf.FloorToInt(b);
+        int result = scores[i];
+
+        //distance
+        float d = Vector2.Distance(Vector2.zero, v) / Board.transform.localScale.x;
+        d *= 200;
+
+        if (d < 80)
+        {
+            if (d < 72)
+            {
+                if (d < 50)
+                {
+                    result *= 2;
+                    if (d < 45)
+                    {
+                        if (d < 13)
+                        {
+                            result = 50;
+                            if (d < 7)
+                                result = 100;
+                        }
+                    }
+                }
+            }
+        }
+        else
+            result = 0;
+
+        return result;
+    }*/
 }
