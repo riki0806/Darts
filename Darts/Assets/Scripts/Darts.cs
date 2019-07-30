@@ -7,12 +7,15 @@ public class Darts : MonoBehaviour
 {
     //public GameObject Score, Board;
     public float DragSpeed, ThrowSpeed, RotationSpeed;
+    public GameObject congrats;
+    //AudioSource audioSource;
     int[] scores = { 20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5 };
     //int points = 0;
 
 
     void Start()
     {
+        //audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -38,7 +41,10 @@ public class Darts : MonoBehaviour
     void FixedUpdate()
     {
         if (Input.GetMouseButtonUp(0))
-            GetComponent<Rigidbody>().AddForce(Vector3.forward * ThrowSpeed, ForceMode.Impulse);
+        {
+            //GetComponent<Rigidbody>().AddForce(Vector3.forward * ThrowSpeed, ForceMode.Impulse);
+            GetComponent<Rigidbody>().velocity = transform.forward * ThrowSpeed;
+        }
     }
 
     void OnCollisionEnter()
@@ -46,6 +52,14 @@ public class Darts : MonoBehaviour
         GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         //AddPoints();
         tag = "Finish";
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "target")
+        {
+            congrats.SetActive(true);
+            GetComponent<AudioSource>().Play();
+        }
     }
 
     /*private void AddPoints()
